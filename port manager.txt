@@ -1,0 +1,149 @@
+#!/bin/bash
+# created By Tal Yanai
+# OpenPorts Tool - Allows users to open or close common ports easily
+
+# Ensure the script is run as root
+if [[ $EUID -ne 0 ]]; then
+   echo "Please run this script as root (using sudo)."
+   exit 1
+fi
+
+# Function to install a package if it is not already installed
+install_package() {
+    if ! dpkg -s "$1" &> /dev/null; then
+        echo "$1 is not installed. Installing..."
+        apt-get update
+        apt-get install -y "$1"
+    else
+        echo "$1 is already installed."
+    fi
+}
+
+# Automatically install dependencies on the first run
+install_package nmap
+install_package ufw
+install_package net-tools
+install_package gawk
+
+# Enable ufw if it is not already enabled
+if ufw status | grep -q "inactive"; then
+    echo "Enabling ufw..."
+    ufw --force enable
+fi
+
+# Declare PORTS as a global associative array
+declare -A PORTS
+
+declare -A ALL_PORTS
+
+# Function to dynamically scan existing open ports and services
+function scan_ports() {
+    PORTS=() # Reset the array to prevent duplicate data
+    echo "Scanning system for active services and corresponding ports..."
+    
+    # Get list of active TCP and UDP services and their ports from ss
+    mapfile -t service_ports < <(ss -tulnp | awk 'NR>1 {split($5, a, ":"); print a[length(a)]" "$7}' | sort -n | uniq)
+    mapfile -t udp_service_ports < <(ss -unlp | awk 'NR>1 {split($5, a, ":"); print a[length(a)]" "$7}' | sort -n | uniq)
+    
+    service_ports+=(${udp_service_ports[@]}) # Merge TCP and UDP ports
+    
+    for entry in "${service_ports[@]}"; do
+        port=$(echo $entry | awk '{print $1}')
+        service=$(echo $entry | awk -F'/' '{print $2}')
+        
+        # If the service name is empty, try to get it from getent
+        if [[ -z "$service" || "$service" == "-" ]]; then
+            service=$(getent services "$port" | awk '{print $1}')
+            if [[ -z "$service" ]]; then
+                service="Unknown"
+            fi
+        fi
+        PORTS[$port]="$service"
+    done
+    
+    # Load all known ports from /etc/services and sort them by popularity
+    popular_ports=(22 80 443 53 25 110 143 3306 5432 3389 5900 25565 27015 123 21)
+    while read -r line; do
+        port=$(echo "$line" | awk '{print $2}' | cut -d'/' -f1)
+        service=$(echo "$line" | awk '{print $1}')
+        ALL_PORTS[$port]="$service"
+    done < <(grep -E "^[a-zA-Z]" /etc/services | awk '{print $1, $2}')
+    
+    # Sort the ports based on popularity order
+    sorted_ports=()
+    for p in "${popular_ports[@]}"; do
+        if [[ -n "${ALL_PORTS[$p]}" ]]; then
+            sorted_ports+=("$p")
+        fi
+    done
+    for p in "${!ALL_PORTS[@]}"; do
+        if [[ ! " ${popular_ports[@]} " =~ " $p " ]]; then
+            sorted_ports+=("$p")
+        fi
+    done
+}
+
+# Function to display the main action menu
+function main_menu() {
+    clear
+    echo "============================="
+    echo "     OpenPorts Tool  "
+    echo "============================="
+    echo "1) Open a Port"
+    echo "2) Shut a Port"
+    echo "3) Quit"
+    echo "============================="
+}
+
+while true; do
+    main_menu
+    read -p "Select an option (1: Open, 2: Shut, 3: Quit): " action
+    
+    if [[ "$action" == "3" ]]; then
+        echo "Exiting..."
+        exit 0
+    
+    elif [[ "$action" == "1" ]]; then
+        scan_ports
+        read -p "Press [Enter] to continue..."  # Allow time to review debug output
+        clear
+        echo "============================="
+        echo "     Available Ports  "
+        echo "============================="
+        echo "Enter the port number to open from the list below:"
+        for port in "${sorted_ports[@]}"; do
+            echo "$port) ${ALL_PORTS[$port]}"
+        done
+        echo "============================="
+        read -p "Enter the port number to process: " choice
+        echo "Opening port $choice..."
+        sudo ufw allow $choice
+        echo "Port $choice opened successfully!"
+        read -p "Press [Enter] to continue..."
+    
+    elif [[ "$action" == "2" ]]; then
+        scan_ports
+        read -p "Press [Enter] to continue..."  # Allow time to review debug output
+        clear
+        echo "============================="
+        echo "     Open Ports  "
+        echo "============================="
+        if [[ ${#PORTS[@]} -eq 0 ]]; then
+            echo "No open ports found."
+        else
+            echo "Enter the port number to close from the list below:"
+            for port in "${!PORTS[@]}"; do
+                echo "$port) ${PORTS[$port]}"
+            done
+            echo "============================="
+            read -p "Enter the port number to process: " choice
+            echo "Closing port $choice..."
+            sudo ufw deny $choice
+            echo "Port $choice closed successfully!"
+        fi
+        read -p "Press [Enter] to continue..."
+    else
+        echo "Invalid option, please try again."
+        read -p "Press [Enter] to continue..."
+    fi
+done

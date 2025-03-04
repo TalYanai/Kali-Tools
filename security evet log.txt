@@ -1,0 +1,156 @@
+#!/bin/bash
+# Security Log Eventer - Custom security logging tool for Kali Linux
+# Created by Tal Yanai
+
+LOG_FILE="/var/log/custom_security_events.log"
+SYSLOG_TAG="SecurityLogEventer"
+EMAIL_RECIPIENT="kalitestty@gmail.com"
+SMTP_CONFIG="/etc/ssmtp/ssmtp.conf"
+
+# Ensure the script is run as root
+if [[ $EUID -ne 0 ]]; then
+   echo "Please run this script as root (using sudo)."
+   exit 1
+fi
+
+# Install required packages
+apt-get update && apt-get install -y mailutils ssmtp inotify-tools
+
+# Open required ports for email sending
+ufw allow 25/tcp
+ufw allow 587/tcp
+ufw allow 465/tcp
+
+# Ensure SMTP is configured for Gmail
+if [[ ! -f "$SMTP_CONFIG" ]]; then
+    echo "Configuring SMTP for Gmail..."
+    cat <<EOF > "$SMTP_CONFIG"
+mailhub=smtp.gmail.com:587
+AuthUser=kalitestty@gmail.com
+AuthPass=qwer4321!
+UseSTARTTLS=YES
+EOF
+    chmod 600 "$SMTP_CONFIG"
+fi
+
+# Set the log file to be immutable (undeletable and unmodifiable)
+chattr +i "$LOG_FILE"
+
+# Function to write logs to both syslog and a custom log file
+log_event() {
+    local event_type="$1"
+    local message="$2"
+    
+    # Timestamp
+    local timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+    
+    # Format log entry
+    local log_entry="$timestamp [$event_type] $message"
+    
+    # Temporarily allow writing to log file, then make it immutable again
+    chattr -i "$LOG_FILE"
+    echo "$log_entry" >> "$LOG_FILE"
+    tail -n 1000 "$LOG_FILE" > "$LOG_FILE.tmp" && mv "$LOG_FILE.tmp" "$LOG_FILE"
+    chattr +i "$LOG_FILE"
+    
+    # Send to syslog
+    logger -t "$SYSLOG_TAG" "$log_entry"
+    
+    # Send email alert using ssmtp
+    echo -e "Subject: [Security Alert] $event_type detected\n$log_entry" | ssmtp "$EMAIL_RECIPIENT"
+}
+
+# Monitor if someone tries to modify/delete the log file
+monitor_log_protection() {
+    echo "Monitoring log file integrity..."
+    inotifywait -m -e modify,attrib,delete "$LOG_FILE" |
+    while read event; do
+        log_event "SECURITY_ALERT" "Unauthorized attempt to modify or delete the log file!"
+    done &
+}
+
+# Function to monitor file modifications across all system directories
+monitor_files() {
+    echo "Monitoring file modifications..."
+    inotifywait -m -r -e modify,attrib,delete,create --format '%w%f %e' / --exclude "/proc|/sys|/dev|/run|/var/log" |
+    while read file event; do
+        owner=$(stat -c "%U" "$file" 2>/dev/null)
+        if [[ "$owner" != "root" ]]; then
+            log_event "SECURITY_ALERT" "Unauthorized modification: $file ($event) by $owner"
+        fi
+    done &
+}
+
+# Function to track external outgoing connections
+monitor_ports() {
+    echo "Monitoring external connections..."
+    while true; do
+        ss -tunp | awk 'NR>1 {print $5, $6}' | grep -E ':80|:443|:22' | while read line; do
+            log_event "PORT_ACCESS" "External connection detected: $line"
+        done
+        sleep 5
+    done &
+}
+
+# Function to display log menu with filtering options
+function main_menu() {
+    clear
+    echo "============================="
+    echo "     Security Log Eventer  "
+    echo "============================="
+    echo "1) View Logs"
+    echo "2) Search Logs by Date"
+    echo "3) Search Logs by Event Type"
+    echo "4) Search Logs by Port Number"
+    echo "5) Search Logs by Modified File"
+    echo "6) Quit"
+    echo "============================="
+}
+
+# Start monitoring files, ports, and log integrity in the background
+monitor_files
+monitor_ports
+monitor_log_protection
+
+while true; do
+    main_menu
+    read -p "Select an option (1-6): " action
+    
+    case "$action" in
+        1)
+            echo "============================="
+            echo "     Security Log Events  "
+            echo "============================="
+            cat "$LOG_FILE" 2>/dev/null || echo "No logs found."
+            read -p "Press [Enter] to continue..."
+            ;;
+        2)
+            read -p "Enter date (YYYY-MM-DD): " date
+            grep "$date" "$LOG_FILE" 2>/dev/null || echo "No logs found for $date."
+            read -p "Press [Enter] to continue..."
+            ;;
+        3)
+            read -p "Enter event type (SECURITY_ALERT, PORT_ACCESS, etc.): " event_type
+            grep "$event_type" "$LOG_FILE" 2>/dev/null || echo "No logs found for event type $event_type."
+            read -p "Press [Enter] to continue..."
+            ;;
+        4)
+            read -p "Enter port number: " port
+            grep ":$port" "$LOG_FILE" 2>/dev/null || echo "No logs found for port $port."
+            read -p "Press [Enter] to continue..."
+            ;;
+        5)
+            read -p "Enter filename to search: " filename
+            grep "$filename" "$LOG_FILE" 2>/dev/null || echo "No logs found for file $filename."
+            read -p "Press [Enter] to continue..."
+            ;;
+        6)
+            echo "Exiting Security Log Eventer..."
+            exit 0
+            ;;
+        *)
+            echo "Invalid option, please try again."
+            read -p "Press [Enter] to continue..."
+            ;;
+    esac
+done

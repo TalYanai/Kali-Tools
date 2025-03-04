@@ -32,15 +32,24 @@ while true; do
         1) while true; do
             clear
             echo "===== System Operations ====="
-            echo "1) Show system uptime (uptime)"
+          echo "1) Show system uptime (uptime)"
             echo "2) Check disk space (df -h)"
             echo "3) Show memory usage (free -m)"
             echo "4) List system logs (journalctl -n 50)"
             echo "5) Show CPU info (lscpu)"
             echo "6) Show kernel version (uname -r)"
-            echo "7) Return to main menu"
+            echo "7) Check running services (systemctl list-units --type=service)"
+            echo "8) Show active users (w)"
+            echo "9) Show system hostname (hostnamectl)"
+            echo "10) List installed packages (dpkg -l | less)"
+            echo "11) Check battery status (upower -i /org/freedesktop/UPower/devices/battery_BAT0)"
+            echo "12) Show current system load (uptime)"
+            echo "13) Show environment variables (printenv)"
+            echo "14) Display last system boot time (who -b)"
+            echo "15) Show active system timers (systemctl list-timers)"
+            echo "16) Return to main menu"
             echo "============================="
-            read -p "Select an option [1-7]: " sys_choice
+            read -p "Select an option [1-16]: " sys_choice
             case $sys_choice in
                 1) uptime; read -p "[Enter] to continue...";;
                 2) df -h; read -p "[Enter] to continue...";;
@@ -48,7 +57,16 @@ while true; do
                 4) journalctl -n 50; read -p "[Enter] to continue...";;
                 5) lscpu; read -p "[Enter] to continue...";;
                 6) uname -r; read -p "[Enter] to continue...";;
-                7) break;;
+                7) systemctl list-units --type=service; read -p "[Enter] to continue...";;
+                8) w; read -p "[Enter] to continue...";;
+                9) hostnamectl; read -p "[Enter] to continue...";;
+                10) dpkg -l | less; read -p "[Enter] to continue...";;
+                11) upower -i /org/freedesktop/UPower/devices/battery_BAT0; read -p "[Enter] to continue...";;
+                12) uptime; read -p "[Enter] to continue...";;
+                13) printenv; read -p "[Enter] to continue...";;
+                14) who -b; read -p "[Enter] to continue...";;
+                15) systemctl list-timers; read -p "[Enter] to continue...";;
+                16) break;;
                 *) echo "❌ Invalid option, please try again.";;
             esac
         done;;
@@ -56,19 +74,41 @@ while true; do
         2) while true; do
             clear
             echo "===== Networking ====="
-            echo "1) Check IP address (ifconfig / ip a)"
+             echo "1) Check IP address (ip a)"
             echo "2) Test network connectivity (ping -c 4 8.8.8.8)"
             echo "3) Scan network with Nmap (nmap -sn 192.168.1.0/24)"
             echo "4) Show open ports on host (nmap -p- example.com)"
-            echo "5) Return to main menu"
+            echo "5) Capture network packets (tcpdump -i eth0)"
+            echo "6) Show routing table (ip route)"
+            echo "7) List active network connections (ss -tulnp)"
+            echo "8) WHOIS lookup (whois example.com)"
+            echo "9) DNS lookup (nslookup example.com)"
+            echo "10) Trace network path (traceroute example.com)"
+            echo "11) Display network statistics (netstat -s)"
+            echo "12) Test bandwidth speed (speedtest-cli)"
+            echo "13) View Wi-Fi networks (iwlist wlan0 scan)"
+            echo "14) Get MAC address of interface (ip link show)"
+            echo "15) Restart networking service (systemctl restart networking)"
+            echo "16) Return to main menu"
             echo "============================="
-            read -p "Select an option [1-5]: " net_choice
+            read -p "Select an option [1-16]: " net_choice
             case $net_choice in
-                1) ifconfig || ip a; read -p "[Enter] to continue...";;
+                1) ip a; read -p "[Enter] to continue...";;
                 2) ping -c 4 8.8.8.8; read -p "[Enter] to continue...";;
                 3) nmap -sn 192.168.1.0/24; read -p "[Enter] to continue...";;
                 4) nmap -p- example.com; read -p "[Enter] to continue...";;
-                5) break;;
+                5) tcpdump -i eth0; read -p "[Enter] to continue...";;
+                6) ip route; read -p "[Enter] to continue...";;
+                7) ss -tulnp; read -p "[Enter] to continue...";;
+                8) whois example.com; read -p "[Enter] to continue...";;
+                9) nslookup example.com; read -p "[Enter] to continue...";;
+                10) traceroute example.com; read -p "[Enter] to continue...";;
+                11) netstat -s; read -p "[Enter] to continue...";;
+                12) speedtest-cli; read -p "[Enter] to continue...";;
+                13) iwlist wlan0 scan; read -p "[Enter] to continue...";;
+                14) ip link show; read -p "[Enter] to continue...";;
+                15) sudo systemctl restart networking; read -p "[Enter] to continue...";;
+                16) break;;
                 *) echo "❌ Invalid option, please try again.";;
             esac
         done;;
@@ -78,13 +118,159 @@ while true; do
             echo "===== Cybersecurity ====="
             echo "1) Scan for vulnerabilities (nmap --script vuln example.com)"
             echo "2) Run Nikto web scanner (nikto -h example.com)"
-            echo "3) Return to main menu"
+            echo "3) Hydra brute-force attack (hydra -L users.txt -P passwords.txt example.com ssh)"
+            echo "4) Medusa brute-force attack (medusa -h example.com -U users.txt -P passwords.txt -M ssh)"
+            echo "5) Crack hashes with Hashcat (hashcat -m 0 hash.txt rockyou.txt)"
+            echo "6) SQL injection test (sqlmap -u 'http://example.com?id=1' --batch)"
+            echo "7) Check for open SMB shares (smbclient -L //example.com -N)"
+            echo "8) Extract metadata from files (exiftool file.jpg)"
+            echo "9) Scan website technologies (whatweb example.com)"
+            echo "10) Run WPScan on WordPress site (wpscan --url example.com)"
+            echo "11) Intercept traffic with mitmproxy (mitmproxy -T -p 8080)"
+            echo "12) Capture live packets (tcpdump -i eth0)"
+            echo "13) Scan network for live hosts (arp-scan -l)"
+            echo "14) Enumerate subdomains (sublist3r -d example.com)"
+            echo "15) Analyze logs for threats (goaccess /var/log/nginx/access.log)"
+            echo "16) Return to main menu"
             echo "============================="
-            read -p "Select an option [1-3]: " sec_choice
+            read -p "Select an option [1-16]: " sec_choice
             case $sec_choice in
                 1) nmap --script vuln example.com; read -p "[Enter] to continue...";;
                 2) nikto -h example.com; read -p "[Enter] to continue...";;
-                3) break;;
+                3) hydra -L users.txt -P passwords.txt example.com ssh; read -p "[Enter] to continue...";;
+                4) medusa -h example.com -U users.txt -P passwords.txt -M ssh; read -p "[Enter] to continue...";;
+                5) hashcat -m 0 hash.txt rockyou.txt; read -p "[Enter] to continue...";;
+                6) sqlmap -u 'http://example.com?id=1' --batch; read -p "[Enter] to continue...";;
+                7) smbclient -L //example.com -N; read -p "[Enter] to continue...";;
+                8) exiftool file.jpg; read -p "[Enter] to continue...";;
+                9) whatweb example.com; read -p "[Enter] to continue...";;
+                10) wpscan --url example.com; read -p "[Enter] to continue...";;
+                11) mitmproxy -T -p 8080; read -p "[Enter] to continue...";;
+                12) tcpdump -i eth0; read -p "[Enter] to continue...";;
+                13) arp-scan -l; read -p "[Enter] to continue...";;
+                14) sublist3r -d example.com; read -p "[Enter] to continue...";;
+                15) goaccess /var/log/nginx/access.log; read -p "[Enter] to continue...";;
+                16) break;;
+                *) echo "❌ Invalid option, please try again.";;
+            esac
+        done;;
+
+        4) while true; do
+            clear
+            echo "===== File Management ====="
+          echo "1) List files and directories (ls -lah)"
+            echo "2) Show current directory (pwd)"
+            echo "3) Copy a file (cp source destination)"
+            echo "4) Move a file (mv source destination)"
+            echo "5) Remove a file (rm filename)"
+            echo "6) Create a directory (mkdir directoryname)"
+            echo "7) Delete a directory (rmdir directoryname)"
+            echo "8) Find a file (find / -name filename)"
+            echo "9) Display file content (cat filename)"
+            echo "10) Show disk usage per directory (du -sh *)"
+            echo "11) Show file types (file filename)"
+            echo "12) Compress a file (tar -czvf file.tar.gz filename)"
+            echo "13) Extract a tar.gz file (tar -xzvf file.tar.gz)"
+            echo "14) Find large files (find / -type f -size +100M)"
+            echo "15) Securely delete a file (shred -u filename)"
+            echo "16) Return to main menu"
+            echo "============================="
+            read -p "Select an option [1-16]: " file_choice
+            case $file_choice in
+                1) ls -lah; read -p "[Enter] to continue...";;
+                2) pwd; read -p "[Enter] to continue...";;
+                3) read -p "Enter source file and destination: " src dest; cp "$src" "$dest"; read -p "[Enter] to continue...";;
+                4) read -p "Enter source file and destination: " src dest; mv "$src" "$dest"; read -p "[Enter] to continue...";;
+                5) read -p "Enter file to remove: " file; rm "$file"; read -p "[Enter] to continue...";;
+                6) read -p "Enter directory name to create: " dir; mkdir "$dir"; read -p "[Enter] to continue...";;
+                7) read -p "Enter directory name to delete: " dir; rmdir "$dir"; read -p "[Enter] to continue...";;
+                8) read -p "Enter filename to find: " file; find / -name "$file" 2>/dev/null; read -p "[Enter] to continue...";;
+                9) read -p "Enter filename to display: " file; cat "$file"; read -p "[Enter] to continue...";;
+                10) du -sh *; read -p "[Enter] to continue...";;
+                11) read -p "Enter filename to check type: " file; file "$file"; read -p "[Enter] to continue...";;
+                12) read -p "Enter filename to compress: " file; tar -czvf "$file.tar.gz" "$file"; read -p "[Enter] to continue...";;
+                13) read -p "Enter tar.gz filename to extract: " file; tar -xzvf "$file"; read -p "[Enter] to continue...";;
+                14) find / -type f -size +100M 2>/dev/null; read -p "[Enter] to continue...";;
+                15) read -p "Enter filename to securely delete: " file; shred -u "$file"; read -p "[Enter] to continue...";;
+                16) break;;
+                *) echo "❌ Invalid option, please try again.";;
+            esac
+        done;;
+
+        5) while true; do
+            clear
+            echo "===== User Management ====="
+            echo "1) Show currently logged-in users (who)"
+            echo "2) Show last login history (last)"
+            echo "3) Display user ID (id $USER)"
+            echo "4) List all system users (cat /etc/passwd)"
+            echo "5) Show groups of a user (groups $USER)"
+            echo "6) Add a new user (sudo adduser username)"
+            echo "7) Delete a user (sudo deluser username)"
+            echo "8) Change user password (passwd username)"
+            echo "9) Lock a user account (sudo usermod -L username)"
+            echo "10) Unlock a user account (sudo usermod -U username)"
+            echo "11) Show sudo users (grep -Po '^sudo.+:\K.*$' /etc/group)"
+            echo "12) Check last password change (chage -l $USER)"
+            echo "13) Show all logged-in users (w)"
+            echo "14) List all user sessions (who -u)"
+            echo "15) Return to main menu"
+            echo "============================="
+            read -p "Select an option [1-15]: " user_choice
+            case $user_choice in
+                1) who; read -p "[Enter] to continue...";;
+                2) last; read -p "[Enter] to continue...";;
+                3) id $USER; read -p "[Enter] to continue...";;
+                4) cat /etc/passwd; read -p "[Enter] to continue...";;
+                5) groups $USER; read -p "[Enter] to continue...";;
+                6) read -p "Enter new username: " uname; sudo adduser "$uname"; read -p "[Enter] to continue...";;
+                7) read -p "Enter username to delete: " uname; sudo deluser "$uname"; read -p "[Enter] to continue...";;
+                8) read -p "Enter username to change password: " uname; passwd "$uname"; read -p "[Enter] to continue...";;
+                9) read -p "Enter username to lock: " uname; sudo usermod -L "$uname"; read -p "[Enter] to continue...";;
+                10) read -p "Enter username to unlock: " uname; sudo usermod -U "$uname"; read -p "[Enter] to continue...";;
+                11) grep -Po '^sudo.+:\K.*$' /etc/group; read -p "[Enter] to continue...";;
+                12) chage -l $USER; read -p "[Enter] to continue...";;
+                13) w; read -p "[Enter] to continue...";;
+                14) who -u; read -p "[Enter] to continue...";;
+                15) break;;
+                *) echo "❌ Invalid option, please try again.";;
+            esac
+        done;;
+        
+        6) while true; do
+            clear
+            echo "===== Process Management ====="
+            echo "1) Show running processes (ps aux)"
+            echo "2) Display real-time processes (top)"
+            echo "3) Show resource usage (htop)"
+            echo "4) Kill a process (kill PID)"
+            echo "5) Force kill a process (kill -9 PID)"
+            echo "6) Show process tree (pstree)"
+            echo "7) Monitor system performance (vmstat 1 10)"
+            echo "8) Show CPU usage per process (pidstat)"
+            echo "9) List open files by process (lsof -p PID)"
+            echo "10) Check memory usage (smem)"
+            echo "11) Show disk I/O usage (iostat)"
+            echo "12) Show network connections per process (netstat -tup)"
+            echo "13) Show system load (uptime)"
+            echo "14) Return to main menu"
+            echo "============================="
+            read -p "Select an option [1-15]: " process_choice
+            case $process_choice in
+                1) ps aux; read -p "[Enter] to continue...";;
+                2) top; read -p "[Enter] to continue...";;
+                3) htop; read -p "[Enter] to continue...";;
+                4) read -p "Enter PID to kill: " pid; kill "$pid"; read -p "[Enter] to continue...";;
+                5) read -p "Enter PID to force kill: " pid; kill -9 "$pid"; read -p "[Enter] to continue...";;
+                6) pstree; read -p "[Enter] to continue...";;
+                7) vmstat 1 10; read -p "[Enter] to continue...";;
+                8) pidstat; read -p "[Enter] to continue...";;
+                9) read -p "Enter PID to list open files: " pid; lsof -p "$pid"; read -p "[Enter] to continue...";;
+                10) smem; read -p "[Enter] to continue...";;
+                11) iostat; read -p "[Enter] to continue...";;
+                12) netstat -tup; read -p "[Enter] to continue...";;
+                13) uptime; read -p "[Enter] to continue...";;
+                14) break;;
                 *) echo "❌ Invalid option, please try again.";;
             esac
         done;;
@@ -94,13 +280,37 @@ while true; do
             echo "===== Fun Hello Commands ====="
             echo "1) Hello World"
             echo "2) Say Hello with Cowsay"
-            echo "3) Return to main menu"
+            echo "3) Show the Train Animation"
+            echo "4) Fortune Cookie Message"
+            echo "5) Random Quote"
+            echo "6) ASCII Art Hello"
+            echo "7) Display Date with Hello"
+            echo "8) Personalized Greeting"
+            echo "9) System Hostname with Hello"
+            echo "10) Reverse Hello"
+            echo "11) Shuffled Hello"
+            echo "12) Rainbow Hello (lolcat)"
+            echo "13) Morse Code Hello"
+            echo "14) Say Hello with Figlet"
+            echo "15) Return to main menu"
             echo "============================="
-            read -p "Select an option [1-3]: " hello_choice
+            read -p "Select an option [1-15]: " hello_choice
             case $hello_choice in
                 1) echo "Hello, World!"; read -p "[Enter] to continue...";;
                 2) cowsay "Hello, Hacker!"; read -p "[Enter] to continue...";;
-                3) break;;
+                3) sl; read -p "[Enter] to continue...";;
+                4) fortune; read -p "[Enter] to continue...";;
+                5) shuf -n 1 /usr/share/dict/words; read -p "[Enter] to continue...";;
+                6) echo "(\"Hello\")" | figlet; read -p "[Enter] to continue...";;
+                7) echo "Hello! Today is $(date)"; read -p "[Enter] to continue...";;
+                8) read -p "Enter your name: " name; echo "Hello, $name!"; read -p "[Enter] to continue...";;
+                9) echo "Hello from $(hostname)!"; read -p "[Enter] to continue...";;
+                10) echo "Hello, World!" | rev; read -p "[Enter] to continue...";;
+                11) echo "Hello, World!" | fold -w1 | shuf | tr -d '\n'; echo; read -p "[Enter] to continue...";;
+                12) echo "Hello, World!" | lolcat; read -p "[Enter] to continue...";;
+                13) echo "Hello World" | morse; read -p "[Enter] to continue...";;
+                14) figlet "Hello, World!"; read -p "[Enter] to continue...";;
+                15) break;;
                 *) echo "❌ Invalid option, please try again.";;
             esac
         done;;

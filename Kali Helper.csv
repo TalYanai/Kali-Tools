@@ -1,0 +1,110 @@
+#!/bin/bash
+
+# Script created by [Your Name]
+
+# Ensure the script is copied to /usr/local/bin for global access
+INSTALL_PATH="/usr/local/bin/kali_helper"
+if [ "$0" != "$INSTALL_PATH" ]; then
+    echo "Installing script to $INSTALL_PATH..."
+    sudo cp "$0" "$INSTALL_PATH"
+    sudo chmod +x "$INSTALL_PATH"
+    echo "Installation complete. You can now run 'kali_helper' from anywhere."
+    exit 0
+fi
+
+while true; do
+    clear
+    echo "============================="
+    echo "     Kali Linux Helper  "
+    echo "============================="
+    echo "1) System Operations"
+    echo "2) Networking"
+    echo "3) Cybersecurity"
+    echo "4) File Management"
+    echo "5) User Management"
+    echo "6) Process Management"
+    echo "7) Fun Hello Commands"
+    echo "8) Exit"
+    echo "============================="
+    read -p "Select a category [1-8]: " category
+
+    case $category in
+        1) while true; do
+            clear
+            echo "===== System Operations ====="
+            echo "1) Show system uptime (uptime)"
+            echo "2) Check disk space (df -h)"
+            echo "3) Show memory usage (free -m)"
+            echo "4) List system logs (journalctl -n 50)"
+            echo "5) Show CPU info (lscpu)"
+            echo "6) Show kernel version (uname -r)"
+            echo "7) Return to main menu"
+            echo "============================="
+            read -p "Select an option [1-7]: " sys_choice
+            case $sys_choice in
+                1) uptime; read -p "[Enter] to continue...";;
+                2) df -h; read -p "[Enter] to continue...";;
+                3) free -m; read -p "[Enter] to continue...";;
+                4) journalctl -n 50; read -p "[Enter] to continue...";;
+                5) lscpu; read -p "[Enter] to continue...";;
+                6) uname -r; read -p "[Enter] to continue...";;
+                7) break;;
+                *) echo "❌ Invalid option, please try again.";;
+            esac
+        done;;
+
+        2) while true; do
+            clear
+            echo "===== Networking ====="
+            echo "1) Check IP address (ifconfig / ip a)"
+            echo "2) Test network connectivity (ping -c 4 8.8.8.8)"
+            echo "3) Scan network with Nmap (nmap -sn 192.168.1.0/24)"
+            echo "4) Show open ports on host (nmap -p- example.com)"
+            echo "5) Return to main menu"
+            echo "============================="
+            read -p "Select an option [1-5]: " net_choice
+            case $net_choice in
+                1) ifconfig || ip a; read -p "[Enter] to continue...";;
+                2) ping -c 4 8.8.8.8; read -p "[Enter] to continue...";;
+                3) nmap -sn 192.168.1.0/24; read -p "[Enter] to continue...";;
+                4) nmap -p- example.com; read -p "[Enter] to continue...";;
+                5) break;;
+                *) echo "❌ Invalid option, please try again.";;
+            esac
+        done;;
+
+        3) while true; do
+            clear
+            echo "===== Cybersecurity ====="
+            echo "1) Scan for vulnerabilities (nmap --script vuln example.com)"
+            echo "2) Run Nikto web scanner (nikto -h example.com)"
+            echo "3) Return to main menu"
+            echo "============================="
+            read -p "Select an option [1-3]: " sec_choice
+            case $sec_choice in
+                1) nmap --script vuln example.com; read -p "[Enter] to continue...";;
+                2) nikto -h example.com; read -p "[Enter] to continue...";;
+                3) break;;
+                *) echo "❌ Invalid option, please try again.";;
+            esac
+        done;;
+
+        7) while true; do
+            clear
+            echo "===== Fun Hello Commands ====="
+            echo "1) Hello World"
+            echo "2) Say Hello with Cowsay"
+            echo "3) Return to main menu"
+            echo "============================="
+            read -p "Select an option [1-3]: " hello_choice
+            case $hello_choice in
+                1) echo "Hello, World!"; read -p "[Enter] to continue...";;
+                2) cowsay "Hello, Hacker!"; read -p "[Enter] to continue...";;
+                3) break;;
+                *) echo "❌ Invalid option, please try again.";;
+            esac
+        done;;
+        8) echo "Exiting..."; exit 0;;
+        *) echo "❌ Invalid option, please try again.";;
+    esac
+done
